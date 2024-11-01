@@ -1,0 +1,16 @@
+{
+  "devDependencies": {
+    "@google/clasp": "^2.4.2",
+    "@types/google-apps-script": "^1.0.84",
+    "clasp": "^1.0.0",
+    "esbuild": "^0.24.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.6.3"
+  },
+  "scripts": {
+    "bundle": "esbuild src/main.ts --bundle --outdir=dist --format=iife --global-name=_entry",
+    "build": "npm run bundle && ts-node -T ./script/build.ts",
+    "open": "clasp open",
+    "push": "npm run build && clasp push"
+  }
+}
