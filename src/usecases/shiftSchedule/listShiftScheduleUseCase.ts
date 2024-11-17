@@ -2,6 +2,7 @@ import { Member } from "@/entities";
 import { ListMemberUseCase, ListShiftUseCase, ListWorkTypeUseCase } from "@/usecases";
 
 type ShiftSchedule = {
+  id: string;
   date: Date;
   details: {
     category: string;
@@ -18,6 +19,7 @@ export class ListShiftScheduleUseCase {
 
     return listShifts.map((shift) => {
       return {
+        id: Utilities.getUuid(),
         date: shift.date,
         details: listWorkTypes
           .map((workType) => {
