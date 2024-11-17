@@ -1,4 +1,4 @@
-import { ListShiftScheduleUseCase } from "@/usecases/shiftSchedule/listShiftSchedule";
+import { ListShiftScheduleUseCase } from "@/usecases/shiftSchedule";
 
 export class AppController {
   private pathInfo: string;
