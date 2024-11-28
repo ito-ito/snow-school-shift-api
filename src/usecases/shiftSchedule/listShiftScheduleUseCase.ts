@@ -6,8 +6,10 @@ type ShiftSchedule = {
   date: Date;
   details: {
     category: string;
-    role: string;
-    members: Member[];
+    roles: {
+      role: string;
+      members: Member[];
+    }[];
   }[];
 };
 
@@ -18,27 +20,39 @@ export class ListShiftScheduleUseCase {
     const listWorkTypes = ListWorkTypeUseCase.execute();
 
     return listShifts.map((shift) => {
-      return {
-        id: Utilities.getUuid(),
-        date: shift.date,
-        details: listWorkTypes
-          .map((workType) => {
-            const shiftDetails = shift.details.filter((detail) => {
-              return detail.workTypeLabel === workType.label;
-            });
-            const members = shiftDetails
-              .map((detail) => listMembers.find((member) => member.name === detail.memberName))
-              .filter((member) => !!member);
+      const detailsByCategory = Object.groupBy(shift.details, (detail) => {
+        const workType = listWorkTypes.find((wt) => wt.label === detail.workTypeLabel);
+        return workType?.category ?? "unknown";
+      });
 
-            return (
-              members.length && {
-                category: workType.category,
-                role: workType.role,
-                members: members,
-              }
-            );
-          })
-          .filter((v) => !!v),
+      const details = Object.entries(detailsByCategory)
+        .filter(([category]) => category !== "unknown")
+        .map(([category, categoryDetails]) => {
+          const roles = Object.entries(
+            Object.groupBy(categoryDetails, (detail) => {
+              const workType = listWorkTypes.find((wt) => wt.label === detail.workTypeLabel);
+              return workType?.role ?? "unknown";
+            })
+          )
+            .filter(([role]) => role !== "unknown")
+            .map(([role, roleDetails]) => ({
+              role,
+              members: roleDetails
+                .map((detail) => listMembers.find((m) => m.name === detail.memberName))
+                .filter((m) => m !== undefined),
+            }));
+
+          console.log(roles);
+          return {
+            category: category,
+            roles,
+          };
+        });
+
+      return {
+        id: shift.id,
+        date: shift.date,
+        details,
       };
     });
   }
